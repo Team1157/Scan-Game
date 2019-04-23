@@ -1,10 +1,14 @@
 <?php
+/*
+delete from `scans` where `scans`.`id` > 0;
+alter table `scans` AUTO_INCREMENT = 1;
+*/
 if (!isset($_GET['id'])) die("No ID");
 if (!isset($_GET['loc'])) die("No Location");
+
 $id = $_GET['id'];
 $loc = $_GET['loc'];
 
-echo("Scan ".$id." at loc ".$loc." at ");
 $mysqli = null;
 try { // Connect
 	$mysqli = new mysqli('127.0.0.1', 'scangame', 'scangame', 'scangame');
@@ -14,23 +18,17 @@ try { // Connect
 	}
 } catch (Exception $e) {
 	header("HTTP/1.1 500 Internal Server Error");
-	echo "Error: Could not connect to database";
-	exit;
+	die("Error: Could not connect to database");
 }
-echo("Ree");
 
-$sql = "version";
-if (!$queryresult = $mysqli->query($sql)) {
-	header("HTTP/1.1 500 Internal Server Error");
-	echo "Error. Database query failed.";
-	echo "Query: " . $sql . "<br>Errno: " . $mysqli->errno . "<br>Error: " . $mysqli->error . "<br>";
-	exit;
-}
-if ($queryresult->num_rows == 0) return; 
-echo($queryresult);
+$eid = mysqli_real_escape_string($mysqli, $id);
+$eloc = mysqli_real_escape_string($mysqli, $loc);
+$sql = "INSERT INTO `scans` (`time`, `user`, `location`) VALUES (CURRENT_TIMESTAMP, '".$eid."', '".$eloc."')";
+$mysqli->query($sql);
 
-echo("re?");
+$sql = "SELECT * from `scans` where `id` = ".$mysqli->insert_id;
+$result = $mysqli->query($sql)->fetch_assoc();
 
+echo("Scan id: ".$result["id"]."<br>User: ".$result["user"]."<br>Location: ".$result["location"]."<br>Time: ".$result["time"]);
 
 ?>
-</br>End
