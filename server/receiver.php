@@ -4,13 +4,16 @@ delete from `scans` where `scans`.`id` > 0;
 alter table `scans` AUTO_INCREMENT = 1;
 */
 $id = 1;
-$loc = 2;
+$loc = 1;
+$token = "";
 
-if (!isset($_GET['id'])) die("No ID");
-if (!isset($_GET['loc'])) die("No Location");
+if (!isset($_POST['id'])) die("No ID");
+if (!isset($_POST['loc'])) die("No Location");
+if (!isset($_POST['token'])) die("No Token");
 
-$id = $_GET['id'];
-$loc = $_GET['loc'];
+$id = $_POST['id'];
+$loc = $_POST['loc'];
+$token = $_POST['token'];
 //*/
 
 if (!preg_match("/^\d{1,10}$/", $id)) die("Invalid id");
@@ -27,6 +30,9 @@ try { // Connect
 	header("HTTP/1.1 500 Internal Server Error");
 	die("Error: Could not connect to database");
 }
+
+$sql = "SELECT * from `points` where `id` = ".$loc;
+if (strcmp($mysqli->query($sql)->fetch_assoc()["token"], $token) != 0) die("Bad token");
 
 
 // Check last scan

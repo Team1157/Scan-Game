@@ -2,17 +2,37 @@
 /*
 INSERT INTO `points` (`id`, `name`, `password`) VALUES ('1', 'Name', 'Hello');
 */
-
+header('Content-Type: application/json');
+function done($err, $errMsg = "", $output = null) {
+	$output->err = $err;
+	$output->errmsg = $errMsg;
+	die(json_encode($output));
+}
 /*
-if (!isset($_GET['loc'])) die("No Location");
-$loc = $_GET['loc'];
-if (!preg_match("/^\d{1,10}$/", $loc)) die("Invalid location");
+Error Messages:
+0  - Success
+1  - Database Error
+2  - No location
+3  - No user
+4  - No password
+5  - No token
+6  - Invalid location
+7  - Invalid user
+8  - Invalid password
+9  - Invalid token
+10 - Not authenticated
 
-if (!isset($_GET['password'])) die("No password");
-$pwd = $_GET['password'];
 */
-$pwd = "Hello";
-$loc = 1;
+
+if (!isset($_POST['loc'])) done(2, "No Location");
+$loc = $_POST['loc'];
+if (!preg_match("/^\d{1,10}$/", $loc)) done(6, "Invalid location");
+
+if (!isset($_POST['password'])) done(4, "No password");
+$pwd = $_POST['password'];
+//*/
+//$pwd = "Hello";
+//$loc = 1;
 $mysqli = null;
 try { // Connect
 	$mysqli = new mysqli('127.0.0.1', 'scangame', 'scangame', 'scangame');
@@ -21,16 +41,15 @@ try { // Connect
 		//echo "Errno: " . $mysqli->connect_errno . "<br>Error: " . $mysqli->connect_error . "<br>";
 	}
 } catch (Exception $e) {
-	header("HTTP/1.1 500 Internal Server Error");
-	die("Error: Could not connect to database");
+	done(1, "Error: Could not connect to database");
 }
 
 // Check last scan
 $sql = "SELECT * from `points` where `id` = ".$loc;
 $response = $mysqli->query($sql);
-if ($response->num_rows == 0) die("Location not registered");
+if ($response->num_rows == 0) done(6, "Location not registered");
 $result = $response->fetch_assoc();
-if (strcmp($result["password"], $pwd) != 0) die("Incorrect password");
+if (strcmp($result["password"], $pwd) != 0) done(8, "Incorrect password");
 
 $token = "";
 $characters = array_merge(range('A','Z'), range('a','z'), range('0','9'));
@@ -45,12 +64,11 @@ $mysqli->query($sql);
 
 // Check user in users
 $sql = "SELECT * from `points` where `id` = ".$loc;
-$result = $mysqli->query($sql);
+$result = $mysqli->query($sql)->fetch_assoc();
 
-$json->id = $result["id"];
+$json->id = (int)$result["id"];
 $json->name = $result["name"];
 $json->token = $result["token"];
-
-echo(json_encode($json));
+done(0, "Success", $json);
 
 ?>
