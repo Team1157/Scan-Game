@@ -5,6 +5,7 @@ import requests
 import json
 
 
+
 class Location:
     def __init__(self):
         with open("conf.json", "r") as f:
