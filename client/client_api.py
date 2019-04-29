@@ -4,9 +4,10 @@ import json
 
 
 class Event:
-    def __init__(self, event_level: int, event_type: str):
+    def __init__(self, event_level: int, event_type: str, extra_data=None):
         self.event_level = event_level
         self.event_type = event_type
+        self.extra_data = extra_data
         self.time = datetime.now()
         self.is_read = False
 
@@ -14,7 +15,8 @@ class Event:
         self.is_read = True
 
     def get_as_object(self):
-        return {"event_level": self.event_level, "event_type": self.event_type, "time": self.time}
+        return {"event_level": self.event_level, "event_type": self.event_type, "time": self.time,
+                "extra_data": self.extra_data}
 
 
 class ApiServer:
@@ -24,17 +26,15 @@ class ApiServer:
         self.location_id = self.data["location_id"]
         self.events = []
 
-    def receive_event(self, event_level, event_type):
-        self.events.append(Event(event_level=int(event_level), event_type=event_type))
+    def receive_event(self, event_level, event_type, extra_data):
+        print(f"Got event {event_type} at level {event_level} with extra data {extra_data}")
+        self.events.append(Event(event_level=int(event_level), event_type=event_type, extra_data=extra_data))
 
-    def get_oldest_unread_important_event(self):
-        for event in self.events:
-            if event.event_level > 0:
+    def get_event_smart(self):
+        for event in self.events[::-1]:
+            if event.event_level > 0 and not event.is_read:
                 event.mark_read()
                 return event
-        return None
-
-    def get_most_recent_event(self) -> Event:
         return self.events[-1]
 
 
@@ -51,15 +51,16 @@ def info():
 @app.route("/notify_event/", methods=["POST"])
 def notify_event():
     data = request.form
-    api_server.receive_event(event_level=data["event_level"], event_type=data["event_type"])
+    event_level = data["event_level"]
+    event_type = data["event_type"]
+    extra_data = request.form.get("extra_info", None)
+    api_server.receive_event(event_level=event_level, event_type=event_type, extra_data=extra_data)
     return jsonify(success=True)
 
 
 @app.route("/get_event_smart/")
 def get_event_smart():
-    event = api_server.get_oldest_unread_important_event()
-    if not event:
-        event = api_server.get_most_recent_event()
+    event = api_server.get_event_smart()
     return jsonify(event.get_as_object())
 
 

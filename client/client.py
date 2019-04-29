@@ -4,6 +4,10 @@ import re
 import requests
 import json
 
+from api_bridge import Bridge
+
+bridge = Bridge()
+
 
 class Location:
     def __init__(self):
@@ -36,9 +40,11 @@ class Location:
             return True
         elif code == 5:
             # Scanned too recently
+            bridge.warning_scanned_recent()
             return False
         elif code == 7:
             # Failed scanning
+            bridge.warning_malformed_name()
             return False
 
     def authenticate(self):
@@ -63,8 +69,7 @@ class Location:
         response_json = response.json()
         if self.handle_error(response_json["err"], response_json["errmsg"]):
             print(f"Successfully scanned {user_id}")
-        else:
-            print(f"Scanned too recently")
+            bridge.success_scan(user_id=user_id)
 
 
 def ocr_extract(text: str):
@@ -85,10 +90,16 @@ def main():
     while True:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        output = ocr_extract(pytesseract.image_to_string(gray))
-        if output[0] and output[1]:
-            print(f"ID: {output[0]} Name: {output[1]}")
-            location.report_scan(output[0], output[1])
+        ocr_result = pytesseract.image_to_string(gray)
+        if ocr_result:
+            output = ocr_extract(ocr_result)
+            if output[0] and output[1]:
+                print(f"ID: {output[0]} Name: {output[1]}")
+                location.report_scan(output[0], output[1])
+            else:
+                bridge.status_scanned_no_extract()
+        else:
+            bridge.status_scanning()
 
 
 if __name__ == "__main__":
