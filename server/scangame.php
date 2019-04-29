@@ -14,6 +14,7 @@ function done($err, $errMsg = "", $output = null) {
     4  - Not authenticated
     5  - Rate limit
     6  - Noes not exist
+    7  - Name not in lookup or mismatch
     */
 }
 
