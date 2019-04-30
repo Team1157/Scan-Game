@@ -13,22 +13,34 @@ check_token($loc);
 
 // Check if user exists. If they do return their name
 function check_user($id) {
-    $nameIn = input("name");
-    global $mysqli;
+    $firstIn = input("first");
+    $lastIn = input("last");
+    $nameIn = $firstIn . " " . $lastIn;
+    global $mysqli, $teams;
     
     $sql = "SELECT `name` from `users` where `id` = " . $id;
     $response = $mysqli->query($sql);
     $nameU = null;
     if ($response->num_rows == 1) { // User exists. Get their name
         $nameU = $response->fetch_assoc()["name"];
-        if (strcmp($nameIn, $nameU)) return $nameIn;
-        else if (similar_text($nameIn, $nameU) > 7) return $nameU;
-        else done(7, "mismatch name");
+        if (strcmp($nameIn, $nameU)) return $nameU; // Names exact
+        else if (similar_text($nameIn, $nameU) > 7) return $nameU; // Names close
+        else done(7, "mismatch name"); // Reee names dont match
     } else { // User doesnt exist. Make them
-        $insert = "INSERT INTO `users` (`name`, `id`, `added`, `team`) VALUES ('" . $name . "', '" . $id . "', CURRENT_TIMESTAMP, 'Team" . $id . "')";
+        //$sql = "SELECT `first`,`last` FROM `lookup` WHERE `first` LIKE '".$firstIn."' AND last LIKE '%".substr($lastIn,2)."' AND sid is null;";
+        $sql = "SELECT `first`,`last` FROM `lookup` WHERE `first` LIKE '" . $firstIn . "' AND last LIKE '%' AND sid is null;";
+        $response = $mysqli->query($sql);
+        if ($response->num_rows == 0) done(7, "Name not in lookup ");
+        $back = $response->fetch_assoc();
+        $firstL = $back["first"];
+        $lastL = $back["last"];
+        $nameL = $firstL . " " . $lastL;
+        $team = $teams[array_rand($teams)];
+    
+        $insert = "INSERT INTO `users` (`name`, `id`, `added`, `team`) VALUES ('" . $nameL . "', '" . $id . "', CURRENT_TIMESTAMP, '" . $team . "')";
         $mysqli->query($insert);
         $response = $mysqli->query($sql);
-        $name = $response->fetch_assoc()["name"];
+        return $response->fetch_assoc()["name"];
     }
     
 }

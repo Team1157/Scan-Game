@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-
+$teams = ["Red", "Yellow", "Green", "Blue"];
 function done($err, $errMsg = "", $output = null) {
     $output->err = $err;
     $output->errmsg = $errMsg;
