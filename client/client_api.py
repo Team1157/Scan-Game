@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from datetime import datetime
 import json
+from flask_cors import CORS
 
 
 class Event:
@@ -39,6 +40,7 @@ class ApiServer:
 
 
 app = Flask(__name__)
+CORS(app)
 
 api_server = ApiServer()
 
@@ -65,4 +67,4 @@ def get_event_smart():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=5000, )
