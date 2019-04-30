@@ -1,100 +1,70 @@
-import cv2
-import pytesseract
-import re
-import requests
+from flask import Flask, jsonify, request
+from datetime import datetime
 import json
+from flask_cors import CORS
 
 
+class Event:
+    def __init__(self, event_level: int, event_type: str, extra_data=None):
+        self.event_level = event_level
+        self.event_type = event_type
+        self.extra_data = extra_data
+        self.time = datetime.now()
+        self.is_read = False
 
-class Location:
+    def mark_read(self):
+        self.is_read = True
+
+    def get_as_object(self):
+        return {"event_level": self.event_level, "event_type": self.event_type, "time": self.time,
+                "extra_data": self.extra_data}
+
+
+class ApiServer:
     def __init__(self):
         with open("conf.json", "r") as f:
             self.data = json.load(f)
-        self.password = self.data["password"]
         self.location_id = self.data["location_id"]
-        self.base_url = self.data["base_url"]
+        self.events = []
 
-        self.location_name = ""
-        self.ready = False
-        self.authenticated = False
-        self.scanning = False
-        self.token = ""
+    def receive_event(self, event_level, event_type, extra_data):
+        print(f"Got event {event_type} at level {event_level} with extra data {extra_data}")
+        self.events.append(Event(event_level=int(event_level), event_type=event_type, extra_data=extra_data))
 
-    @staticmethod
-    def handle_error(code: int, error_message: str):
-        if code == 1:
-            raise Exception(f"Error code 1, database error! Got error_message {error_message}, Exiting...")
-        elif code == 2:
-            raise Exception(f"Error code 2, missing input! Got error_message {error_message}, Exiting...")
-        elif code == 3:
-            raise Exception(f"Error code 3, invalid input! Got error_message {error_message}, Exiting...")
-        elif code == 4:
-            raise Exception(f"Error code 4, Wrong token or password. Got error_message {error_message}, Exiting...")
-        elif code == 6:
-            raise Exception(f"Error code 6, Does not exist. Got error_message {error_message}, Exiting...")
-        elif code == 0:
-            # Everything is fine
-            return True
-        elif code == 5:
-            # Scanned too recently
-            return False
-        elif code == 7:
-            # Failed scanning
-            return False
-
-    def authenticate(self):
-        response = requests.post(f"{self.base_url}/ptcfg.php",
-                                 data={"password": self.password, "loc": self.location_id})
-        response_json = response.json()
-        if self.handle_error(response_json["err"], response_json["errmsg"]):
-            self.authenticated = True
-            self.ready = True
-            self.token = response_json["token"]
-            self.location_name = response_json["name"]
-            print(f"Logged in successfully, got token {self.token}")
-
-    def report_scan(self, user_id: int, user_name: str):
-        data = {
-            "id": str(user_id),
-            "name": user_name,
-            "loc": str(self.location_id),
-            "token": self.token,
-        }
-        response = requests.post(f"{self.base_url}/receiver.php", data=data)
-        response_json = response.json()
-        if self.handle_error(response_json["err"], response_json["errmsg"]):
-            print(f"Successfully scanned {user_id}")
-        else:
-            print(f"Scanned too recently")
+    def get_event_smart(self):
+        for event in self.events[::-1]:
+            if event.event_level > 0 and not event.is_read:
+                event.mark_read()
+                return event
+        return self.events[-1]
 
 
-def ocr_extract(text: str):
-    allowed_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:, "
-    simple_string = ''.join(i for i in text if i in allowed_chars)
-    name_search_result = re.search("[A-Z]+, [A-Z]+( |$)", simple_string)
-    id_search_result = re.search("[4-5][0-9]{5}", text)
-    name = name_search_result[0] if name_search_result else None
-    user_id = int(id_search_result[0]) if id_search_result else None
-    return user_id, name
+app = Flask(__name__)
+CORS(app)
+
+api_server = ApiServer()
 
 
-def main():
-    location = Location()
-    location.authenticate()
-    cap = cv2.VideoCapture(1)
+@app.route("/info/")
+def info():
+    return jsonify({"location_id": api_server.location_id})
 
-    while True:
-        ret, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        output = ocr_extract(pytesseract.image_to_string(gray))
-        if output[0] and output[1]:
-            print(f"ID: {output[0]} Name: {output[1]}")
-            location.report_scan(output[0], output[1])
+
+@app.route("/notify_event/", methods=["POST"])
+def notify_event():
+    data = request.form
+    event_level = data["event_level"]
+    event_type = data["event_type"]
+    extra_data = request.form.get("extra_info", None)
+    api_server.receive_event(event_level=event_level, event_type=event_type, extra_data=extra_data)
+    return jsonify(success=True)
+
+
+@app.route("/get_event_smart/")
+def get_event_smart():
+    event = api_server.get_event_smart()
+    return jsonify(event.get_as_object())
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-        exit(0)
+    app.run(port=5000, )
