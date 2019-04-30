@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from datetime import datetime
 import json
+from flask_cors import CORS
 
 
 class Event:
@@ -31,7 +32,7 @@ class ApiServer:
         self.events.append(Event(event_level=int(event_level), event_type=event_type, extra_data=extra_data))
 
     def get_event_smart(self):
-        for event in self.events[::-1]:
+        for event in self.events:
             if event.event_level > 0 and not event.is_read:
                 event.mark_read()
                 return event
@@ -39,6 +40,7 @@ class ApiServer:
 
 
 app = Flask(__name__)
+CORS(app)
 
 api_server = ApiServer()
 
@@ -50,10 +52,13 @@ def info():
 
 @app.route("/notify_event/", methods=["POST"])
 def notify_event():
-    data = request.form
+    data: dict = request.get_json()
     event_level = data["event_level"]
     event_type = data["event_type"]
-    extra_data = request.form.get("extra_info", None)
+    if "extra_info" in data.keys():
+        extra_data = data["extra_info"]
+    else:
+        extra_data = None
     api_server.receive_event(event_level=event_level, event_type=event_type, extra_data=extra_data)
     return jsonify(success=True)
 
@@ -65,4 +70,4 @@ def get_event_smart():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=5000, )
