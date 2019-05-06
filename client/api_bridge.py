@@ -23,7 +23,7 @@ class Bridge:
             data = {"event_level": event_level, "event_type": event_type, "extra_info": extra_info}
         else:
             data = {"event_level": event_level, "event_type": event_type}
-        requests.post("http://127.0.0.1:5000/notify_event/", data=data)
+        requests.post("http://127.0.0.1:5000/notify_event/", json=data)
 
     @staticmethod
     def _get_level(event_type: str) -> int:
@@ -56,8 +56,10 @@ class Bridge:
     def status_scanned_no_extract(self):
         self.report(event_type="status_scan_no_extract")
 
-    def success_scan(self, user_id: int):
-        self.report(event_type="success_scan", extra_info=user_id)
+    def success_scan(self, user_id: int, user_name: str, user_team: str, created: bool):
+        print({"user_id": user_id, "user_name": user_name, "user_team": user_team, "created": created})
+        self.report(event_type="success_scan",
+                    extra_info={"user_id": user_id, "user_name": user_name, "user_team": user_team, "created": created})
 
     def warning_scanned_recent(self):
         self.report(event_type="warning_scanned_recent")

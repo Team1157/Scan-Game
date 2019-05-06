@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Connectivity check</title>
+    <script
+            src="https://code.jquery.com/jquery-3.4.0.js"
+            integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
+            crossorigin="anonymous"></script>
+</head>
+<body style="text-align: center">
+<h1>Checking connectivity...</h1>
+<h2 id="client">Client: Unknown</h2>
+<h2 id="api">API: Unknown</h2>
+</body>
+<script>
+    let client = false;
+    let api = false;
+    let redirecting = false;
+
+    function checkClient() {
+        $.getJSON("http://127.0.0.1:5000/info/", function (data) {
+            if (data["location_id"]) {
+                client = true;
+                $("#client").html("Client: OK").css("color", "green")
+            }
+        })
+    }
+
+    function checkAPI() {
+        $.getJSON("https://scangame.zusor.org/success.php", function (data) {
+            if (data["err"] === 0) {
+                api = true;
+                $("#api").html("API: OK").css("color", "green")
+            }
+        })
+    }
+
+
+    function redir() {
+        if (client === true && api === true && redirecting === false) {
+            redirecting = true;
+            setTimeout(function () {
+                window.location.href = "http://localhost:63342/Scan-Game/api_web_client_test/templates/test.html"
+            }, 400);
+        }
+    }
+
+    window.setInterval(redir, 500);
+    window.setInterval(checkAPI, 1000);
+    window.setInterval(checkClient, 500)
+</script>
+</html>

@@ -13,6 +13,7 @@ class Location:
     """
     Handles location methods and tasks like reporting scans, handling errors and reading the config
     """
+
     def __init__(self):
         """
         Reads the config and initializes some defaults
@@ -93,8 +94,10 @@ class Location:
         response = requests.post(f"{self.base_url}/receiver.php", data=data)
         response_json = response.json()
         if self.handle_error(response_json["err"], response_json["errmsg"]):
-            print(f"Successfully scanned {user_id}")
-            bridge.success_scan(user_id=user_id)
+            bridge.success_scan(user_id=response_json["user_id"], user_name=response_json["user_name"],
+                                user_team=response_json["user_team"], created=response_json["user_created"])
+        else:
+            bridge.warning_scanned_recent()
 
 
 def ocr_extract(text: str):
