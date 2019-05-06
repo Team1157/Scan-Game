@@ -11,6 +11,11 @@ $id = input("id", true);
 
 check_token($loc);
 
+// Check last scan for location
+$sql = "SELECT * from `scans` where `location` = " . $loc . " and `time` > now()-5";
+if ($mysqli->query($sql)->num_rows != 0) done(5, "Location scanned to recently");
+
+
 // Check if user exists. If they do return their name otherwise makes user and returns name
 function get_user($id) {
     $firstIn = input("first");
@@ -56,16 +61,12 @@ function get_user($id) {
 // Check if user exists
 $user = get_user($id);
 
-// Check last scan for location
-$sql = "SELECT * from `scans` where `location` = " . $loc . " and `time` > now()-5";
-if ($mysqli->query($sql)->num_rows != 0) done(5, "Location scanned to recently");
-
 // Check last scan for user
 $sql = "SELECT * from `scans` where `user` = " . $id . " and `time` > now()-5";
 if ($mysqli->query($sql)->num_rows != 0) done(5, "User scanned to recently");
 
 // Log the scan
-$sql = "INSERT INTO `scans` (`time`, `user`, `location`) VALUES (CURRENT_TIMESTAMP, '" . $id . "', '" . $loc . "')";
+$sql = "INSERT INTO `scans` (`time`, `user`, `location`, `team`) VALUES (CURRENT_TIMESTAMP, '" . $id . "', '" . $loc . "', '" . $user["team"] . "')";
 $mysqli->query($sql);
 
 // Get id of just logged scan
