@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script
+            src="https://code.jquery.com/jquery-3.4.0.js"
+            integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
+            crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+<div style="width: 100%; position: absolute; left: 50%; transform: translate(-50%, 0%); height: 100%;">
+    <div class="row">
+
+        <div class="col" style="width: 25%">
+
+            <div class="card grey" id="location_claim_card">
+                <div class="card-content white-text">
+
+                    <h3 style="text-align: center">Current claim:<br><span id="location_claim">None</span></h3>
+                    <h4 style="text-align: center">Multiplier: <span id="location_multiplier">x0</span></h4>
+
+                </div>
+            </div>
+
+            <div class="card cyan">
+                <div class="card-content white-text">
+                    <span class="card-title">Owners of point</span>
+
+                    <div id="location_owners"></div>
+
+                </div>
+            </div>
+
+            <div class="card black">
+                <div class="card-content white-text">
+                    <h3 style="text-align: center"><span id="points_collected_so_far">0</span> points so far</h3>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="col" style="width: 50%">
+
+            <div class="card-panel black">
+                <video id="thing" autoplay loop muted playsinline
+                       src="http://dl3.webmfiles.org/big-buck-bunny_trailer.webm" style="width: 100%"></video>
+            </div>
+
+
+        </div>
+
+        <div class="col" style="width: 25%">
+
+            <div id="leaderboard_card" class="card grey">
+                <div class="card-content white-text">
+                    <span class="card-title">Leaderboard</span>
+
+                    <ol>
+                        <li id="leaderboard_first" style="font-size: 170%">Unknown: 0</li>
+                        <li id="leaderboard_second" style="font-size: 120%">Unknown: 0</li>
+                        <li id="leaderboard_third" style="font-size: 120%">Unknown: 0</li>
+                        <li id="leaderboard_fourth" style="font-size: 120%">Unknown: 0</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card purple">
+                <div class="card-content white-text">
+                    <span class="card-title">People Leaderboard</span>
+                    <ol>
+                        <li style="font-size: 110%"><span id="name_person_1">Missing</span>: <span id="info_person_1" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_2">Missing</span>: <span id="info_person_2" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_3">Missing</span>: <span id="info_person_3" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_4">Missing</span>: <span id="info_person_4" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_5">Missing</span>: <span id="info_person_5" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_6">Missing</span>: <span id="info_person_6" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_7">Missing</span>: <span id="info_person_7" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_8">Missing</span>: <span id="info_person_8" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_9">Missing</span>: <span id="info_person_9" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_10">Missing</span>: <span id="info_person_10" style="float: right"></span></li>
+                    </ol>
+
+                </div>
+            </div>
+
+            <div class="card blue darken-4">
+                <div class="card-content white-text">
+                    <h6>For more info go to <a href="">scangame.zusor.org</a></h6>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+
+
+<script>
+
+    let pointsSoFar = 0;
+    let mult = 0;
+    let doScoring = false;
+    let doLeaderboardScoring = false;
+
+    let leaderboard_first = {"name": "", "score": 0, "score_per_second": 0};
+    let leaderboard_second = {"name": "", "score": 0, "score_per_second": 0};
+    let leaderboard_third = {"name": "", "score": 0, "score_per_second": 0};
+    let leaderboard_fourth = {"name": "", "score": 0, "score_per_second": 0};
+
+    String.prototype.capitalize = function () {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    };
+
+
+    function update() {
+        $.getJSON("http://127.0.0.1:5000/get_event_smart/", function (data) {
+            $("#status_field").html(data["event_type"])
+        })
+    }
+
+    function postScanReset() {
+        pointsSoFar = 0;
+        doScoring = true;
+        doLeaderboardScoring = true;
+    }
+
+    function setNeutral() {
+        $("#location_claim_card").removeClass().addClass("card grey");
+        $("#location_claim").text("None");
+        $("#location_multiplier").text("x0");
+
+        setPointOwners([]);
+
+        mult = 0;
+        setPointPointsSoFar(0);
+        updatePoints();
+        doScoring = false;
+
+        setBunny();
+
+        doLeaderboardScoring = false;
+        $("#leaderboard_card").removeClass().addClass("card grey");
+        $("#leaderboard_first").html("Unknown: 0");
+        $("#leaderboard_second").html("Unknown: 0");
+        $("#leaderboard_third").html("Unknown: 0");
+        $("#leaderboard_fourth").html("Unknown: 0");
+
+        setPeopleLeaderboard([]);
+
+
+    }
+
+    function setPointClaim(color) {
+        $("#location_claim_card").removeClass().addClass("card").addClass(color);
+        $("#location_claim").text(color.capitalize());
+    }
+
+    function setPointMultiplier(multiplier) {
+        mult = multiplier;
+        $("#location_multiplier").text("x" + multiplier)
+
+    }
+
+    function setPointOwners(owners) {
+        $("#location_owners").find("ul").remove();
+        let ul = document.createElement("ul");
+        document.getElementById("location_owners").appendChild(ul);
+        owners.forEach(function (item) {
+            let li = document.createElement('li');
+            ul.appendChild(li);
+            li.innerHTML += item;
+        });
+    }
+
+    function setPointPointsSoFar(points) {
+        doScoring = true;
+        pointsSoFar = points;
+    }
+
+    function updatePoints() {
+        if (doScoring) {
+            pointsSoFar += mult;
+            $("#points_collected_so_far").text(pointsSoFar);
+        }
+    }
+
+    function setGameOfThrones() {
+        $("#thing").attr("src", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")
+    }
+
+    function setBunny() {
+        $("#thing").attr("src", "http://dl3.webmfiles.org/big-buck-bunny_trailer.webm")
+
+    }
+
+
+    function setLeaderboard(scores) {
+        doLeaderboardScoring = true;
+        let allLeaderboards = [scores[0], scores[1], scores[2], scores[3]].sort((a, b) => parseFloat(b.score - a.score));
+        leaderboard_first = allLeaderboards[0];
+        leaderboard_second = allLeaderboards[1];
+        leaderboard_third = allLeaderboards[2];
+        leaderboard_fourth = allLeaderboards[3];
+
+    }
+
+    function updateLeaderboard() {
+        if (doLeaderboardScoring) {
+            leaderboard_first["score"] += leaderboard_first["score_per_second"];
+            leaderboard_second["score"] += leaderboard_second["score_per_second"];
+            leaderboard_third["score"] += leaderboard_third["score_per_second"];
+            leaderboard_fourth["score"] += leaderboard_fourth["score_per_second"];
+            let allLeaderboards = [leaderboard_first, leaderboard_second, leaderboard_third, leaderboard_fourth].sort((a, b) => parseFloat(b.score - a.score));
+            leaderboard_first = allLeaderboards[0];
+            leaderboard_second = allLeaderboards[1];
+            leaderboard_third = allLeaderboards[2];
+            leaderboard_fourth = allLeaderboards[3];
+            $("#leaderboard_card").removeClass().addClass("card").addClass(leaderboard_first["name"]);
+            $("#leaderboard_first").html(leaderboard_first["name"].capitalize() + ": " + leaderboard_first["score"]);
+            $("#leaderboard_second").text(leaderboard_second["name"].capitalize() + ": " + leaderboard_second["score"]);
+            $("#leaderboard_third").text(leaderboard_third["name"].capitalize() + ": " + leaderboard_third["score"]);
+            $("#leaderboard_fourth").text(leaderboard_fourth["name"].capitalize() + ": " + leaderboard_fourth["score"]);
+        }
+    }
+    
+    function setPeopleLeaderboard(stats) {
+        stats.forEach(function (person) {
+            $("#name_person_" + person["rank"]).text(person["name"]);
+            $("#info_person_" + person["rank"]).text(person["info"]);
+        })
+    }
+
+
+
+
+    function demo() {
+        postScanReset();
+        setPointClaim("green");
+        setPointMultiplier(3);
+        setPointOwners(["Tobias Messner", "Gary Bailey", "Gaelin Shupe"]);
+        setLeaderboard(
+            [
+                {"score": 350, "name": "red", "score_per_second": 1},
+                {"score": 340, "name": "green", "score_per_second": 20},
+                {"score": 400, "name": "blue", "score_per_second": 1},
+                {"score": 190, "name": "yellow", "score_per_second": 0}
+            ]);
+
+        setPeopleLeaderboard(
+            [
+                {"rank": 1, "name": "Gaelin Shupe", "info": "Scanned 20 times"},
+                {"rank": 2, "name": "Tobias Messner", "info": "Scanned 10 times"},
+                {"rank": 3, "name": "Eli Bell", "info": "Scanned 5 times"},
+                {"rank": 4, "name": "Gary Bailey", "info": "Scanned 2 times"},
+                {"rank": 5, "name": "Xavier Bell", "info": "Scanned 1 times"},
+            ]
+        );
+        setGameOfThrones();
+        window.setTimeout(setBunny, 5000);
+    }
+
+
+    window.setInterval(updatePoints, 1000);
+    window.setInterval(updateLeaderboard, 1000)
+    // window.setInterval(update, 1000)
+
+</script>
+</html>
