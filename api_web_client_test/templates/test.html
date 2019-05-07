@@ -8,6 +8,7 @@
             src="https://code.jquery.com/jquery-3.4.0.js"
             integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
             crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
@@ -17,9 +18,9 @@
 
         <div class="col" style="width: 25%">
 
-            <div class="card red">
+            <div class="card red" id="location_claim_card">
                 <div class="card-content white-text">
-                    <h3 style="text-align: center">Current claim: <span id="location_claim">Unknown</span></h3>
+                    <h3 style="text-align: center">Current claim:<br><span id="location_claim">Unknown</span></h3>
                     <h4 style="text-align: center">Multiplier: <span id="location_multiplier">x0</span></h4>
                 </div>
             </div>
@@ -28,18 +29,14 @@
                 <div class="card-content white-text">
                     <span class="card-title">Owners of point</span>
 
-                    <ul>
-                        <li>Person One</li>
-                        <li>Person One</li>
-                        <li>Person One</li>
-                    </ul>
+                    <div id="location_owners"></div>
 
                 </div>
             </div>
 
             <div class="card black">
                 <div class="card-content white-text">
-                    <h3 style="text-align: center"><span id="points_collected_so_far">500</span> points so far</h3>
+                    <h3 style="text-align: center"><span id="points_collected_so_far">0</span> points so far</h3>
                 </div>
             </div>
 
@@ -106,6 +103,12 @@
 
 <script>
 
+    let pointsSoFar = 0;
+
+    String.prototype.capitalize = function () {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    };
+
 
     function update() {
         $.getJSON("http://127.0.0.1:5000/get_event_smart/", function (data) {
@@ -113,10 +116,40 @@
         })
     }
 
+    function setPointClaim(color) {
+        $("#location_claim_card").removeClass().addClass("card").addClass(color);
+        $("#location_claim").text(color.capitalize());
+    }
+
+    function setPointMultiplier(multiplier) {
+        $("#location_multiplier").text("x" + multiplier)
+
+    }
+
+    function setPointOwners(owners) {
+        $("#location_owners").find("ul").remove();
+        let ul = document.createElement("ul");
+        document.getElementById("location_owners").appendChild(ul);
+        owners.forEach(function (item) {
+            let li = document.createElement('li');
+            ul.appendChild(li);
+            li.innerHTML += item;
+        });
+    }
+
+    function setPointPointsSoFar(points) {
+        pointsSoFar = points;
+    }
+
+    function updatePoints() {
+        pointsSoFar += 1;
+        $("#points_collected_so_far").text(pointsSoFar);
+    }
+
     function thingy() {
         $("#thing").attr("src", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")
     }
-
+    window.setInterval(updatePoints, 1000)
     // window.setInterval(update, 1000)
 
 </script>
