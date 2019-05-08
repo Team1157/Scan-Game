@@ -16,16 +16,26 @@ if ($response->num_rows == 0) done(6, "Location not registered");
 $sql = "SELECT * from `scans` where `location` = ".$loc." ORDER BY `time` DESC LIMIT 1";
 $response = $mysqli->query($sql);
 if ($response->num_rows == 0) die("Location unclaimed");
-$result = $response->fetch_assoc();
+$last = $response->fetch_assoc();
 
-// Check user in users
+// Check last scan
+$sql = "SELECT distinct user FROM scans where location = 1 and time > (
+    SELECT time FROM `scans` where `location` = 1 and `team` <> (
+        SELECT team FROM `scans` where `location` = 1 ORDER BY `time` DESC LIMIT 1
+    ) OR id = 0 ORDER by `time` desc limit 1
+) ORDER BY `time`;";
+$response = $mysqli->query($sql);
+if ($response->num_rows == 0) die("Location unclaimed");
+$users = $response->fetch_assoc();
+
+/*/ Check user in users
 $sql = "SELECT `name` from `users` where `id` = ".$result["user"];
 $name = $mysqli->query($sql)->fetch_assoc()["name"];
-
+*/
 // Output
-$json->scan_id = (int)$result["id"];
-$json->user = $result["user"];
-$json->location = $result["location"];
-$json->time = $result["time"];
+$json->claimed_team = $last["team"];
+$json->multiplier = 1;
+$json->owners = $users;
+$json->last_time = $last["time"];
 done(0, "Success", $json);
 ?>
