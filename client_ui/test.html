@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -74,16 +75,36 @@
                 <div class="card-content white-text">
                     <span class="card-title">People Leaderboard</span>
                     <ol>
-                        <li style="font-size: 110%"><span id="name_person_1">Missing</span>: <span id="info_person_1" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_2">Missing</span>: <span id="info_person_2" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_3">Missing</span>: <span id="info_person_3" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_4">Missing</span>: <span id="info_person_4" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_5">Missing</span>: <span id="info_person_5" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_6">Missing</span>: <span id="info_person_6" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_7">Missing</span>: <span id="info_person_7" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_8">Missing</span>: <span id="info_person_8" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_9">Missing</span>: <span id="info_person_9" style="float: right"></span></li>
-                        <li style="font-size: 110%"><span id="name_person_10">Missing</span>: <span id="info_person_10" style="float: right"></span></li>
+                        <li style="font-size: 110%"><span id="name_person_1">Missing</span>: <span id="info_person_1"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_2">Missing</span>: <span id="info_person_2"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_3">Missing</span>: <span id="info_person_3"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_4">Missing</span>: <span id="info_person_4"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_5">Missing</span>: <span id="info_person_5"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_6">Missing</span>: <span id="info_person_6"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_7">Missing</span>: <span id="info_person_7"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_8">Missing</span>: <span id="info_person_8"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_9">Missing</span>: <span id="info_person_9"
+                                                                                                   style="float: right"></span>
+                        </li>
+                        <li style="font-size: 110%"><span id="name_person_10">Missing</span>: <span id="info_person_10"
+                                                                                                    style="float: right"></span>
+                        </li>
                     </ol>
 
                 </div>
@@ -98,6 +119,7 @@
         </div>
 
     </div>
+     
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
@@ -115,15 +137,47 @@
     let leaderboard_third = {"name": "", "score": 0, "score_per_second": 0};
     let leaderboard_fourth = {"name": "", "score": 0, "score_per_second": 0};
 
+    let current_type = "status_scanning";
+    let current_level = 0;
+    let do_not_interrupt_video = false;
+
     String.prototype.capitalize = function () {
         return this.charAt(0).toUpperCase() + this.slice(1);
     };
 
+    function setVideoInterruptable() {
+        do_not_interrupt_video = false;
+    }
 
-    function update() {
-        $.getJSON("http://127.0.0.1:5000/get_event_smart/", function (data) {
-            $("#status_field").html(data["event_type"])
-        })
+
+    function handleEvent(event) {
+        if (event["event_level"] !== current_level && event["event_type"] !== current_type && !do_not_interrupt_video) {
+            current_type = event["event_type"];
+            current_level = event["event_level"];
+            if (event["event_level"] === 0) {
+                // Check for event_type for exact video
+                setBunny();
+                do_not_interrupt_video = false;
+            } else if (event["event_level"] === 1) {
+                setGameOfThrones();
+                do_not_interrupt_video = true;
+                window.setTimeout(setVideoInterruptable, 7000)
+            } else if (event["event_level"] === 2) {
+                setCar();
+                do_not_interrupt_video = true;
+                window.setTimeout(setVideoInterruptable, 7000)
+
+            }
+        }
+    }
+
+
+    function queryClientAPI() {
+        if (!do_not_interrupt_video) {
+            $.getJSON("http://127.0.0.1:5000/get_event_smart/", function (data) {
+                handleEvent(data)
+            })
+        }
     }
 
     function postScanReset() {
@@ -198,7 +252,10 @@
 
     function setBunny() {
         $("#thing").attr("src", "http://dl3.webmfiles.org/big-buck-bunny_trailer.webm")
+    }
 
+    function setCar() {
+        $("#thing").attr("src", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4")
     }
 
 
@@ -230,15 +287,13 @@
             $("#leaderboard_fourth").text(leaderboard_fourth["name"].capitalize() + ": " + leaderboard_fourth["score"]);
         }
     }
-    
+
     function setPeopleLeaderboard(stats) {
         stats.forEach(function (person) {
             $("#name_person_" + person["rank"]).text(person["name"]);
             $("#info_person_" + person["rank"]).text(person["info"]);
         })
     }
-
-
 
 
     function demo() {
@@ -249,7 +304,7 @@
         setLeaderboard(
             [
                 {"score": 350, "name": "red", "score_per_second": 1},
-                {"score": 340, "name": "green", "score_per_second": 20},
+                {"score": 340, "name": "green", "score_per_second": 15},
                 {"score": 400, "name": "blue", "score_per_second": 1},
                 {"score": 190, "name": "yellow", "score_per_second": 0}
             ]);
@@ -263,14 +318,12 @@
                 {"rank": 5, "name": "Xavier Bell", "info": "Scanned 1 times"},
             ]
         );
-        setGameOfThrones();
-        window.setTimeout(setBunny, 5000);
     }
 
 
     window.setInterval(updatePoints, 1000);
-    window.setInterval(updateLeaderboard, 1000)
-    // window.setInterval(update, 1000)
+    window.setInterval(updateLeaderboard, 1000);
+    window.setInterval(queryClientAPI, 1000)
 
 </script>
 </html>

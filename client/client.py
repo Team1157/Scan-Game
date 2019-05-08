@@ -3,6 +3,7 @@ import pytesseract
 import re
 import requests
 import json
+from datetime import datetime, timedelta
 
 from api_bridge import Bridge
 
@@ -29,6 +30,7 @@ class Location:
         self.authenticated = False
         self.scanning = False
         self.token = ""
+        self.next_scan_allowed = datetime.now()
 
     @staticmethod
     def handle_error(code: int, error_message: str):
@@ -133,18 +135,20 @@ def main():
     cap = cv2.VideoCapture(1)
 
     while True:
-        ret, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        ocr_result = pytesseract.image_to_string(gray)
-        if ocr_result:
-            output = ocr_extract(ocr_result)
-            if output[0] and output[1] and output[2]:
-                print(f"ID: {output[0]} First: {output[1]} Last: {output[2]}")
-                location.report_scan(output[0], output[1], output[2])
+        if datetime.now() > location.next_scan_allowed:
+            ret, frame = cap.read()
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            ocr_result = pytesseract.image_to_string(gray)
+            if ocr_result:
+                output = ocr_extract(ocr_result)
+                if output[0] and output[1] and output[2]:
+                    print(f"ID: {output[0]} First: {output[1]} Last: {output[2]}")
+                    location.report_scan(output[0], output[1], output[2])
+                    location.next_scan_allowed = datetime.now() + timedelta(seconds=5)
+                else:
+                    bridge.status_scanned_no_extract()
             else:
-                bridge.status_scanned_no_extract()
-        else:
-            bridge.status_scanning()
+                bridge.status_scanning()
 
 
 if __name__ == "__main__":
