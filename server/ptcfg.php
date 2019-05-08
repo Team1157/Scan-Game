@@ -7,7 +7,7 @@ $loc = input("loc", true);
 $pwd = input("password");
 
 
-// Check last scan
+// Check location
 $sql = "SELECT * from `points` where `id` = " . $loc;
 $response = $mysqli->query($sql);
 if ($response->num_rows == 0) done(6, "Location not registered");

@@ -6,7 +6,11 @@ alter table `scans` AUTO_INCREMENT = 1;
 */
 
 $loc = input("loc", true);
-check_token($loc);
+
+// Check location
+$sql = "SELECT * from `points` where `id` = " . $loc;
+$response = $mysqli->query($sql);
+if ($response->num_rows == 0) done(6, "Location not registered");
 
 // Check last scan
 $sql = "SELECT * from `scans` where `location` = ".$loc." ORDER BY `time` DESC LIMIT 1";
