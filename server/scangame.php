@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
-$teams = ["Red", "Yellow", "Green", "Blue"];
+$teams = ["red", "yellow", "green", "blue"];
 function done($err, $errMsg = "", $output = null) {
     $output->err = $err;
     $output->errmsg = $errMsg;
