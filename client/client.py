@@ -31,6 +31,7 @@ class Location:
         self.scanning = False
         self.token = ""
         self.next_scan_allowed = datetime.now()
+        self.do_scan_limit = True
 
     @staticmethod
     def handle_error(code: int, error_message: str):
@@ -135,7 +136,7 @@ def main():
     cap = cv2.VideoCapture(1)
 
     while True:
-        if datetime.now() > location.next_scan_allowed:
+        if datetime.now() > location.next_scan_allowed or not location.do_scan_limit:
             ret, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             ocr_result = pytesseract.image_to_string(gray)
@@ -144,7 +145,7 @@ def main():
                 if output[0] and output[1] and output[2]:
                     print(f"ID: {output[0]} First: {output[1]} Last: {output[2]}")
                     location.report_scan(output[0], output[1], output[2])
-                    location.next_scan_allowed = datetime.now() + timedelta(seconds=5)
+                    location.next_scan_allowed = datetime.now() + timedelta(seconds=2)
                 else:
                     bridge.status_scanned_no_extract()
             else:
