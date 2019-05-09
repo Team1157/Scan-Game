@@ -14,6 +14,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
+
+<video autoplay muted loop id="myVideo" style="position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%;">
+    <source src="http://matrixcraft.us/Glitch.mp4" type="video/mp4">
+</video>
 <div style="width: 100%; position: absolute; left: 50%; transform: translate(-50%, 0%); height: 100%;">
     <div class="row">
 
@@ -37,7 +41,7 @@
                 </div>
             </div>
 
-            <div class="card black">
+            <div class="card blue darken-4">
                 <div class="card-content white-text">
                     <h3 style="text-align: center"><span id="points_collected_so_far">0</span> points so far</h3>
                 </div>
@@ -48,9 +52,9 @@
 
         <div class="col" style="width: 50%">
 
-            <div class="card-panel black">
+            <div class="card-panel black" style="padding: 0q">
                 <video id="thing" autoplay loop muted playsinline
-                       src="http://dl3.webmfiles.org/big-buck-bunny_trailer.webm" style="width: 100%"></video>
+                       src="http://mirrors.standaloneinstaller.com/video-sample/jellyfish-25-mbps-hd-hevc.mp4" style="width: 100%"></video>
             </div>
 
 
@@ -67,6 +71,7 @@
                         <li id="leaderboard_second" style="font-size: 120%">Unknown: 0</li>
                         <li id="leaderboard_third" style="font-size: 120%">Unknown: 0</li>
                         <li id="leaderboard_fourth" style="font-size: 120%">Unknown: 0</li>
+                        <li id="leaderboard_fifth" style="font-size: 120%">Unknown: 0</li>
                     </ol>
                 </div>
             </div>
@@ -136,6 +141,7 @@
     let leaderboard_second = {"name": "", "score": 0, "score_per_second": 0};
     let leaderboard_third = {"name": "", "score": 0, "score_per_second": 0};
     let leaderboard_fourth = {"name": "", "score": 0, "score_per_second": 0};
+    let leaderboard_fifth = {"name": "", "score": 0, "score_per_second": 0};
 
     let current_type = "status_scanning";
     let current_level = 0;
@@ -159,13 +165,16 @@
                 setBunny();
                 do_not_interrupt_video = false;
             } else if (event["event_level"] === 1) {
+                refreshStats();
+                postScanReset();
                 setGameOfThrones();
                 do_not_interrupt_video = true;
-                window.setTimeout(setVideoInterruptable, 7000)
+                window.setTimeout(setVideoInterruptable, 4000)
             } else if (event["event_level"] === 2) {
+                refreshStats();
                 setCar();
                 do_not_interrupt_video = true;
-                window.setTimeout(setVideoInterruptable, 7000)
+                window.setTimeout(setVideoInterruptable, 4000)
 
             }
         }
@@ -206,6 +215,7 @@
         $("#leaderboard_second").html("Unknown: 0");
         $("#leaderboard_third").html("Unknown: 0");
         $("#leaderboard_fourth").html("Unknown: 0");
+        $("#leaderboard_fifth").html("Unknown: 0");
 
         setPeopleLeaderboard([]);
 
@@ -228,9 +238,14 @@
         let ul = document.createElement("ul");
         document.getElementById("location_owners").appendChild(ul);
         owners.forEach(function (item) {
+            let correct_name = "";
+            item.split(" ").forEach(function (part) {
+                correct_name += part.capitalize();
+                correct_name += " ";
+            });
             let li = document.createElement('li');
             ul.appendChild(li);
-            li.innerHTML += item;
+            li.innerHTML += correct_name.trim();
         });
     }
 
@@ -247,11 +262,11 @@
     }
 
     function setGameOfThrones() {
-        $("#thing").attr("src", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")
+        $("#thing").attr("src", "http://matrixcraft.us/Mazegen.mp4")
     }
 
     function setBunny() {
-        $("#thing").attr("src", "http://dl3.webmfiles.org/big-buck-bunny_trailer.webm")
+        $("#thing").attr("src", "http://mirrors.standaloneinstaller.com/video-sample/jellyfish-25-mbps-hd-hevc.mp4")
     }
 
     function setCar() {
@@ -261,11 +276,12 @@
 
     function setLeaderboard(scores) {
         doLeaderboardScoring = true;
-        let allLeaderboards = [scores[0], scores[1], scores[2], scores[3]].sort((a, b) => parseFloat(b.score - a.score));
+        let allLeaderboards = [scores[0], scores[1], scores[2], scores[3], scores[4]].sort((a, b) => parseFloat(b.score - a.score));
         leaderboard_first = allLeaderboards[0];
         leaderboard_second = allLeaderboards[1];
         leaderboard_third = allLeaderboards[2];
         leaderboard_fourth = allLeaderboards[3];
+        leaderboard_fifth = allLeaderboards[4];
 
     }
 
@@ -275,16 +291,19 @@
             leaderboard_second["score"] += leaderboard_second["score_per_second"];
             leaderboard_third["score"] += leaderboard_third["score_per_second"];
             leaderboard_fourth["score"] += leaderboard_fourth["score_per_second"];
+            leaderboard_fifth["score"] += leaderboard_fifth["score_per_second"];
             let allLeaderboards = [leaderboard_first, leaderboard_second, leaderboard_third, leaderboard_fourth].sort((a, b) => parseFloat(b.score - a.score));
             leaderboard_first = allLeaderboards[0];
             leaderboard_second = allLeaderboards[1];
             leaderboard_third = allLeaderboards[2];
             leaderboard_fourth = allLeaderboards[3];
+            leaderboard_fifth = allLeaderboards[4];
             $("#leaderboard_card").removeClass().addClass("card").addClass(leaderboard_first["name"]);
             $("#leaderboard_first").html(leaderboard_first["name"].capitalize() + ": " + leaderboard_first["score"]);
             $("#leaderboard_second").text(leaderboard_second["name"].capitalize() + ": " + leaderboard_second["score"]);
             $("#leaderboard_third").text(leaderboard_third["name"].capitalize() + ": " + leaderboard_third["score"]);
             $("#leaderboard_fourth").text(leaderboard_fourth["name"].capitalize() + ": " + leaderboard_fourth["score"]);
+            $("#leaderboard_fifth").text(leaderboard_fifth["name"].capitalize() + ": " + leaderboard_fifth["score"]);
         }
     }
 
@@ -306,7 +325,8 @@
                 {"score": 350, "name": "red", "score_per_second": 1},
                 {"score": 340, "name": "green", "score_per_second": 15},
                 {"score": 400, "name": "blue", "score_per_second": 1},
-                {"score": 190, "name": "yellow", "score_per_second": 0}
+                {"score": 190, "name": "yellow", "score_per_second": 0},
+                {"score": 190, "name": "purple", "score_per_second": 0},
             ]);
 
         setPeopleLeaderboard(
@@ -318,12 +338,24 @@
                 {"rank": 5, "name": "Xavier Bell", "info": "Scanned 1 times"},
             ]
         );
+
+
+    }
+
+    function refreshStats() {
+        $.post("https://scangame.zusor.org/stats.php", {loc: 3}, function (data) {
+            console.log(data);
+            setPointClaim(data["claimed_team"]);
+            setPointMultiplier(data["multiplier"]);
+            setPointOwners(data["owners"]);
+        })
     }
 
 
     window.setInterval(updatePoints, 1000);
     window.setInterval(updateLeaderboard, 1000);
-    window.setInterval(queryClientAPI, 1000)
+    window.setInterval(queryClientAPI, 500);
+    window.setInterval(refreshStats, 1500)
 
 </script>
 </html>

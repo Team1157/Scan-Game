@@ -16,6 +16,11 @@ Messaging codes:
 class Bridge:
     def __init__(self):
         self.previous_event_type = ""
+        try:
+            requests.get("http://127.0.0.1:5000/info/")
+        except requests.exceptions.ConnectionError:
+            print("ERROR, COULD NOT REACH API. Exiting...")
+            exit(1)
 
     @staticmethod
     def _send_request(event_type: str, event_level: int, extra_info=None):
