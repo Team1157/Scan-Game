@@ -15,7 +15,8 @@
 </head>
 <body>
 
-<video autoplay muted loop id="myVideo" style="position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%;">
+<video autoplay muted loop id="myVideo"
+       style="position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%;">
     <source src="http://matrixcraft.us/Glitch.mp4" type="video/mp4">
 </video>
 <div style="width: 100%; position: absolute; left: 50%; transform: translate(-50%, 0%); height: 100%;">
@@ -48,13 +49,16 @@
             </div>
 
 
+
+
         </div>
 
         <div class="col" style="width: 50%">
 
             <div class="card-panel black" style="padding: 0q">
                 <video id="thing" autoplay loop muted playsinline
-                       src="http://mirrors.standaloneinstaller.com/video-sample/jellyfish-25-mbps-hd-hevc.mp4" style="width: 100%"></video>
+                       src="http://mirrors.standaloneinstaller.com/video-sample/jellyfish-25-mbps-hd-hevc.mp4"
+                       style="width: 100%"></video>
             </div>
 
 
@@ -115,9 +119,9 @@
                 </div>
             </div>
 
-            <div class="card blue darken-4">
+            <div class="card deep-orange">
                 <div class="card-content white-text">
-                    <h6>For more info go to <a href="">scangame.zusor.org</a></h6>
+                    <h6>By scanning you agree to our Privacy Policy. Go to <a href="">scangame.zusor.org</a> to read it and learn more about our project.</h6>
                 </div>
             </div>
 
@@ -149,6 +153,14 @@
 
     String.prototype.capitalize = function () {
         return this.charAt(0).toUpperCase() + this.slice(1);
+    };
+
+    $.urlParam = function (name) {
+        const results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results == null) {
+            return null;
+        }
+        return decodeURI(results[1]) || 0;
     };
 
     function setVideoInterruptable() {
@@ -343,7 +355,7 @@
     }
 
     function refreshStats() {
-        $.post("https://scangame.zusor.org/stats.php", {loc: 3}, function (data) {
+        $.post("https://scangame.zusor.org/stats.php", {loc: $.urlParam("loc")}, function (data) {
             console.log(data);
             setPointClaim(data["claimed_team"]);
             setPointMultiplier(data["multiplier"]);

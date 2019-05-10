@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ScanGame</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+<div class="container">
+    <h1>Hi there</h1>
+    <p>
+        Thanks for being interested in our project. This is a game somewhat inspired by the mobile game Ingress, but in
+        real life. Here's how it works. There are multiple locations around Boulder High School for our Game. You can
+        claim a location for your team by using your student ID to hack it.
+    </p>
+
+    <p>
+        A location consists of a monitor with stats/info and a scanner for claiming the location. To claim a location,
+        simply hold your student ID under the scanner for a few seconds. Make sure not to obscure any of the white area,
+        and make sure that the white area's text is facing away from you. If you need more help the monitor has more detailed instructions.
+        On your first scan, you will automatically be assigned a team. The teams are blue, red, green, yellow with purple
+        being reserved for robotics club members.
+    </p>
+
+    <p>
+        Once you claim a point for your team, that point will start collecting points for your team every second. A point earns 1 point
+        a second with that number being affected by the multiplier of that point. The multiplier is the amount of people that have claimed the
+        point for your team. So if you claim the point for your team, then 2 other members of your team also claim it your team would earn 3 points
+        per second. But if someone from another team claims the location, your team will no longer gain points until you reclaim that point.
+    </p>
+
+    <h3>Privacy Policy</h3>
+    <p>
+        Wow, you're actually reading this. So writing this wasn't completely pointless. Anyway, here's the deal.
+        If you scan your ID, we send your student ID, your first name and your last name to our servers over an encrypted
+        connection. We process this information, including comparisons to a database of current students, then store it with
+        information about the scan like the location and time. We do not save any images of your student ID or the picture on it.
+        We do not distribute, sell or make available outside our services any information or data we collect from you.
+        Our services will publicly show your first and last name on our location monitors if you are ranked on a leaderboard or
+        are currently earning points for your team. If you would like your personal data removed or want to have any questions,
+        feel free to contact us at <a href="mailto:1157LandsharkRobotics@gmail.com">1157LandsharkRobotics@gmail.com</a>.
+    </p>
+
+    <h3>Open Source</h3>
+    <p>
+        This project will eventually be fully open-sourced. Currently though, it is still too much work-in-progress. We will
+        eventually post the link to the project here. But if you are interested in contributing please contact us.
+        The project is built using mariaDB and php for the backend including handling scans and scoring while the code for the
+        scanner is written in python using pytesseract for ID recognition and requests for handling networking.
+        The UI is written in HTML/JavaScript/CSS using materializecss. It gets data from an API written in php on our server
+        and a local API for the location status written in python with Flask. Contact us for more info if you're interested.
+    </p>
+
+    <h3>But why though</h3>
+    <p>
+        This is an experiment and final project for Mr. Jiron's computer-science classes. The main purpose was just to make
+        something interesting that people could actually interact with.
+    </p>
+</div>
+</body>
+</html>

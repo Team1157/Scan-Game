@@ -17,10 +17,12 @@
     let client = false;
     let api = false;
     let redirecting = false;
+    let location_id;
 
     function checkClient() {
         $.getJSON("http://127.0.0.1:5000/info/", function (data) {
             if (data["location_id"]) {
+                location_id = data["location_id"];
                 client = true;
                 $("#client").html("Client: OK").css("color", "green")
             }
@@ -41,7 +43,7 @@
         if (client === true && api === true && redirecting === false) {
             redirecting = true;
             setTimeout(function () {
-                window.location.href = "http://localhost:63342/Scan-Game/client_ui/test.html?_ijt=d74b74glnkedu71qettdkt8jti"
+                window.location.href = "http://localhost:63342/Scan-Game/client_ui/test.html?loc=" + location_id;
             }, 400);
         }
     }
