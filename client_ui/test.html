@@ -49,8 +49,6 @@
             </div>
 
 
-
-
         </div>
 
         <div class="col" style="width: 50%">
@@ -119,9 +117,10 @@
                 </div>
             </div>
 
-            <div class="card deep-orange">
+            <div class="card deep-orange lighten-1">
                 <div class="card-content white-text">
-                    <h6>By scanning you agree to our Privacy Policy. Go to <a href="">scangame.zusor.org</a> to read it and learn more about our project.</h6>
+                    <h6>By scanning you agree to our Privacy Policy. Go to <a href="">scangame.zusor.org</a> to read it
+                        and learn more about our project.</h6>
                 </div>
             </div>
 
@@ -177,13 +176,13 @@
                 setBunny();
                 do_not_interrupt_video = false;
             } else if (event["event_level"] === 1) {
-                refreshStats();
+                refreshLocationStats();
                 postScanReset();
                 setGameOfThrones();
                 do_not_interrupt_video = true;
                 window.setTimeout(setVideoInterruptable, 4000)
             } else if (event["event_level"] === 2) {
-                refreshStats();
+                refreshLocationStats();
                 setCar();
                 do_not_interrupt_video = true;
                 window.setTimeout(setVideoInterruptable, 4000)
@@ -304,7 +303,7 @@
             leaderboard_third["score"] += leaderboard_third["score_per_second"];
             leaderboard_fourth["score"] += leaderboard_fourth["score_per_second"];
             leaderboard_fifth["score"] += leaderboard_fifth["score_per_second"];
-            let allLeaderboards = [leaderboard_first, leaderboard_second, leaderboard_third, leaderboard_fourth].sort((a, b) => parseFloat(b.score - a.score));
+            let allLeaderboards = [leaderboard_first, leaderboard_second, leaderboard_third, leaderboard_fourth, leaderboard_fifth].sort((a, b) => parseFloat(b.score - a.score));
             leaderboard_first = allLeaderboards[0];
             leaderboard_second = allLeaderboards[1];
             leaderboard_third = allLeaderboards[2];
@@ -354,8 +353,8 @@
 
     }
 
-    function refreshStats() {
-        $.post("https://scangame.zusor.org/stats.php", {loc: $.urlParam("loc")}, function (data) {
+    function refreshLocationStats() {
+        $.post("https://scangame.zusor.org/location.php", {loc: $.urlParam("loc")}, function (data) {
             console.log(data);
             setPointClaim(data["claimed_team"]);
             setPointMultiplier(data["multiplier"]);
@@ -363,11 +362,20 @@
         })
     }
 
+    function refreshLeaderboardStats() {
+        $.post("https://scangame.zusor.org/leaderboard.php", function (data) {
+            console.log(data);
+            setLeaderboard(data["teams"]);
+        })
+    }
+
+    refreshLeaderboardStats();
 
     window.setInterval(updatePoints, 1000);
     window.setInterval(updateLeaderboard, 1000);
     window.setInterval(queryClientAPI, 500);
-    window.setInterval(refreshStats, 1500)
+    window.setInterval(refreshLocationStats, 1500);
+    window.setInterval(refreshLeaderboardStats, 10000)
 
 </script>
 </html>
