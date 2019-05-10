@@ -12,7 +12,7 @@ $id = input("id", true);
 check_token($loc);
 
 // Check last scan for location
-$sql = "SELECT * from `scans` where `location` = " . $loc . " and `time` > now()-5";
+$sql = "SELECT * from `scans` where `location` = " . $loc . " and `time` > now()-3";
 if ($mysqli->query($sql)->num_rows != 0) done(5, "Location scanned to recently");
 
 
@@ -62,7 +62,7 @@ function get_user($id) {
 $user = get_user($id);
 
 // Check last scan for user
-$sql = "SELECT * from `scans` where `user` = " . $id . " and `time` > now()-5";
+$sql = "SELECT * from `scans` where `user` = " . $id . " and `time` > now()-3";
 if ($mysqli->query($sql)->num_rows != 0) done(5, "User scanned to recently");
 
 // Log the scan
