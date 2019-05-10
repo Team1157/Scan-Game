@@ -54,6 +54,19 @@ function check_token($loc) {
     $sql = "SELECT * from `points` where `id` = " . $loc;
     $result = $mysqli->query($sql);
     if ($result->num_rows == 0 || strcmp($result->fetch_assoc()["token"], $token) != 0) done(4, "Bad token");
-    
 }
 
+function getClimers($loc) {
+    global $mysqli;
+    $sql = "SELECT `time`,`user`,scans.`team`,`name` FROM `scans` LEFT JOIN `users` ON `scans`.`user` = `users`.`id` WHERE `location` = 1 AND `time` > (
+                SELECT `time` FROM `scans` WHERE `location` = " . $loc . " AND `team` <> (
+                    SELECT `team` FROM `scans` WHERE `location` = " . $loc . " ORDER BY `time` DESC LIMIT 1
+                ) OR `id` = 0 ORDER by `time` DESC LIMIT " . $loc . "
+            ) GROUP BY `user` ORDER BY `time` ASC;";
+    $response = $mysqli->query($sql);
+    $users = array();
+    while ($row = $response->fetch_assoc()) {
+        $users[] = $row;
+    }
+    return $users;
+}
