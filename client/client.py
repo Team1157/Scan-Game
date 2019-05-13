@@ -40,7 +40,7 @@ class Location:
         With non-fatal errors returns True for success and False in case of no success. Also communicates to bridge
         :param code: Error code from server
         :param error_message: Error message from server
-        :return: True for success, False for failure, raises Exception otherwise
+        :return: True for success, False for failure, raises Exception otherwise 
         """
         if code == 1:
             raise Exception(f"Error code 1, database error! Got error_message {error_message}, Exiting...")
@@ -147,7 +147,7 @@ def main():
                     location.report_scan(output[0], output[1], output[2])
                     location.next_scan_allowed = datetime.now() + timedelta(seconds=2)
                 else:
-                    bridge.status_scanned_no_extract()
+                    bridge.warning_scanned_no_extract()
             else:
                 bridge.status_scanning()
 

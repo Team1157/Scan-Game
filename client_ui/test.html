@@ -55,7 +55,7 @@
 
             <div class="card-panel black" style="padding: 0q">
                 <video id="thing" autoplay loop muted playsinline
-                       src="http://mirrors.standaloneinstaller.com/video-sample/jellyfish-25-mbps-hd-hevc.mp4"
+                       src="https://cdn-b-east.streamable.com/video/mp4/owp0y.mp4?token=X9RTkwaeSero9ulAMGAoxA&expires=1557785400"
                        style="width: 100%"></video>
             </div>
 
@@ -173,19 +173,24 @@
             current_level = event["event_level"];
             if (event["event_level"] === 0) {
                 // Check for event_type for exact video
-                setBunny();
+                setDefaultVideo();
                 do_not_interrupt_video = false;
             } else if (event["event_level"] === 1) {
                 refreshLocationStats();
                 postScanReset();
-                setGameOfThrones();
+                setSuccessVideo();
                 do_not_interrupt_video = true;
                 window.setTimeout(setVideoInterruptable, 4000)
             } else if (event["event_level"] === 2) {
+                if (event["event_type"] === "warning_scan_no_extract") {
+                    setScanningVideo();
+                } else if (event["event_type"] === "warning_scanned_recent") {
+                    setScannedTooRecentVideo();
+                    do_not_interrupt_video = true;
+                    window.setTimeout(setVideoInterruptable, 500);
+                }
                 refreshLocationStats();
-                setCar();
-                do_not_interrupt_video = true;
-                window.setTimeout(setVideoInterruptable, 4000)
+
 
             }
         }
@@ -218,7 +223,7 @@
         updatePoints();
         doScoring = false;
 
-        setBunny();
+        setDefaultVideo();
 
         doLeaderboardScoring = false;
         $("#leaderboard_card").removeClass().addClass("card grey");
@@ -272,16 +277,20 @@
         }
     }
 
-    function setGameOfThrones() {
-        $("#thing").attr("src", "http://matrixcraft.us/Mazegen.mp4")
+    function setSuccessVideo() {
+        $("#thing").attr("src", "https://cdn-b-east.streamable.com/video/mp4/sz6yx.mp4?token=KSHoCPc8DMEq3ycLqXlfnQ&expires=1557786120")
     }
 
-    function setBunny() {
-        $("#thing").attr("src", "http://mirrors.standaloneinstaller.com/video-sample/jellyfish-25-mbps-hd-hevc.mp4")
+    function setDefaultVideo() {
+        $("#thing").attr("src", "https://cdn-b-east.streamable.com/video/mp4/owp0y.mp4?token=X9RTkwaeSero9ulAMGAoxA&expires=1557785400")
     }
 
-    function setCar() {
-        $("#thing").attr("src", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4")
+    function setScanningVideo() {
+        $("#thing").attr("src", "https://cdn-b-east.streamable.com/video/mp4/3ue3v.mp4?token=K3rr7Dos0viWFDSK6PNiNw&expires=1557787800")
+    }
+
+    function setScannedTooRecentVideo() {
+        $("#thing").attr("src", "https://cdn-b-east.streamable.com/video/mp4/eesuu.mp4?token=isoZo2kn6q3-mI-TYkmeZg&expires=1557787620")
     }
 
 
