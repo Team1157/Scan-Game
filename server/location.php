@@ -5,14 +5,13 @@ delete from `scans` where `scans`.`id` > 0;
 alter table `scans` AUTO_INCREMENT = 1;
 */
 
-$loc = input("loc", true);
+$loc = 3;//input("loc", true);
 
 // Check location
 $sql = "SELECT * from `points` where `id` = " . $loc;
 $response = $mysqli->query($sql);
 if ($response->num_rows == 0) done(6, "Location not registered");
-
-$current_users = getClimers($loc);
+$current_users = getPeopleOnPoint($loc);
 $last = $current_users[0];
 
 $user_names = array();
