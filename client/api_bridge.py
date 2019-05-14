@@ -4,11 +4,11 @@ import requests
 Messaging codes:
     status: The current status of the scanner like scanning and found no text or scanning and could not extract from text
         - status_scanning: Scanning, finding nothing, Level 0
-        - status_scan_no_extract: Scanning, found text, but not readable, Level 0
     success: A scan succeeded
         - success_scan: Location successfully claimed, Level 1
     warning: A warning like scanned too recently
         - warning_scanned_recent: Success scanning and reported, but not accepted because too recent location scan, Level 2
+        - warning_scan_no_extract: Scanning, found text, but not readable, Level 2
         - warning_malformed_name: Success scanning and reported, but not accepted because name unreadable, Level 2
 """
 
@@ -34,13 +34,13 @@ class Bridge:
     def _get_level(event_type: str) -> int:
         if event_type == "status_scanning":
             return 0
-        elif event_type == "status_scan_no_extract":
-            return 0
         elif event_type == "success_scan":
             return 1
         elif event_type == "warning_scanned_recent":
             return 2
         elif event_type == "warning_malformed_name":
+            return 2
+        elif event_type == "warning_scan_no_extract":
             return 2
         else:
             raise Exception("That event_type doesn't exist, something has gone horribly wrong, REEEEEEEEEE")
@@ -58,13 +58,13 @@ class Bridge:
     def status_scanning(self):
         self.report(event_type="status_scanning")
 
-    def status_scanned_no_extract(self):
-        self.report(event_type="status_scan_no_extract")
-
     def success_scan(self, user_id: int, user_name: str, user_team: str, created: bool):
         print({"user_id": user_id, "user_name": user_name, "user_team": user_team, "created": created})
         self.report(event_type="success_scan",
                     extra_info={"user_id": user_id, "user_name": user_name, "user_team": user_team, "created": created})
+
+    def warning_scanned_no_extract(self):
+        self.report(event_type="warning_scan_no_extract")
 
     def warning_scanned_recent(self):
         self.report(event_type="warning_scanned_recent")
