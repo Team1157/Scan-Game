@@ -30,7 +30,7 @@
     }
 
     function checkAPI() {
-        $.getJSON("https://scangame.zusor.org/success.php", function (data) {
+        $.getJSON("https://scangame.zusor.org/leaderboard.php", function (data) {
             if (data["err"] === 0) {
                 api = true;
                 $("#api").html("API: OK").css("color", "green")

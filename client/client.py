@@ -5,7 +5,7 @@ import requests
 import json
 from datetime import datetime, timedelta
 
-from api_bridge import Bridge
+from .api_bridge import Bridge
 
 bridge = Bridge()
 
